@@ -1,0 +1,4 @@
+# Common requirements for all services
+redis
+pyyaml
+python-dotenv

@@ -1,0 +1,41 @@
+pipeline:
+  detection:
+    model: yolov8n
+    confidence_threshold: 0.5
+    classes:
+      - person
+      - sports_ball
+  
+  tracking:
+    tracker: bytetrack
+    track_thresh: 0.5
+    track_buffer: 30
+    match_thresh: 0.8
+  
+  classification:
+    model: gpt-4o-vision
+    window_size: 16
+    stride: 8
+    events:
+      - pass
+      - shot
+      - goal
+      - tackle
+      - corner
+      - free_kick
+      - dribble
+      - save
+  
+  aggregation:
+    cooldown_period: 5.0
+    min_confidence: 0.75
+  
+  commentary:
+    model: gpt-3.5-turbo
+    max_tokens: 30
+    temperature: 0.7
+  
+  tts:
+    model: tts-1
+    voice: alloy
+    speed: 1.0

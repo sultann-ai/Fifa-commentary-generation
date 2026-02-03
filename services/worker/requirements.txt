@@ -1,0 +1,11 @@
+torch
+torchvision
+ultralytics
+opencv-python
+numpy
+redis
+pyyaml
+python-dotenv
+openai
+transformers
+pillow

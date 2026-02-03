@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ FIFA AI Commentator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, 20px); }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            animation: slideDown 0.8s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+        
+        .upload-section {
+            border: 3px dashed #667eea;
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8ebff 100%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-section::before {
+            content: '⚽';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .upload-section:hover {
+            border-color: #764ba2;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+        
+        .upload-section input[type="file"] {
+            display: none;
+        }
+        
+        .upload-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .upload-text {
+            margin-bottom: 25px;
+            color: #555;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .upload-btn:active {
+            transform: translateY(0);
+        }
+        
+        #fileName {
+            margin-top: 20px;
+            color: #764ba2;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            display: none;
+            font-weight: 500;
+            animation: fadeIn 0.3s;
+        }
+        
+        .status.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border-left: 4px solid #28a745;
+            display: block;
+        }
+        
+        .status.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+            display: block;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .video-section {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        
+        video {
+            width: 100%;
+            border-radius: 12px;
+            background: #000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .commentary-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            padding: 25px;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .commentary-section::before {
+            content: '🎙️';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 48px;
+            opacity: 0.1;
+        }
+        
+        .commentary-text {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #444;
+        }
+        
+        .commentary-text p {
+            background: white;
+            padding: 12px 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-left: 3px solid #667eea;
+        }
+        
+        /* Custom scrollbar */
+        .commentary-section::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .commentary-section::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+        
+        .commentary-section::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .loading {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ FIFA AI Commentator</h1>
+            <p class="subtitle">Real-time AI-powered football match commentary</p>
+        </div>
+        
+        <div class="upload-section" onclick="document.getElementById('videoInput').click()">
+            <div class="upload-icon">📹</div>
+            <input type="file" id="videoInput" accept="video/*">
+            <p class="upload-text">Click here or drag and drop your football match video</p>
+            <label for="videoInput" class="upload-btn">Choose Video File</label>
+            <p id="fileName"></p>
+        </div>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="content-grid">
+            <div class="video-section">
+                <div class="section-title">📺 Video Player</div>
+                <video id="videoPlayer" controls></video>
+            </div>
+            
+            <div class="commentary-section">
+                <div class="section-title">🎙️ Live Commentary</div>
+                <div id="commentary" class="commentary-text">
+                    Upload a video to start receiving live AI-powered commentary...
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Powered by OpenAI GPT-3.5 & YOLOv8 | Real-time Computer Vision & NLP
+        </div>
+    </div>
+    
+    <script src="client.js"></script>
+</body>
+</html>

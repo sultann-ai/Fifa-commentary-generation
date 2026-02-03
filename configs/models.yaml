@@ -1,0 +1,14 @@
+models:
+  yolo:
+    path: models/yolov8n.pt
+    device: cuda
+    imgsz: 640
+  
+  classifier:
+    path: models/video_classifier.pth
+    device: cuda
+    batch_size: 8
+  
+  piper:
+    path: models/piper/en_US-lessac-medium.onnx
+    config: models/piper/en_US-lessac-medium.onnx.json
